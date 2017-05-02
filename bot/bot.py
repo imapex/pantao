@@ -70,6 +70,7 @@ app = Flask(__name__)
 # Each key in the dictionary is a command
 # The value is the help message sent for the command
 commands = {
+    "locate": "Locate a user",
     "/echo": "Reply back with the same message sent.",
     "/help": "Get help."
 }
@@ -218,6 +219,8 @@ def process_incoming_message(post_data):
         reply = send_help(post_data)
     elif command in ["/echo"]:
         reply = send_echo(message)
+    elif command in ["locate"]:
+        reply = locate(message)
 
     # send_message_to_room(room_id, reply)
     spark.messages.create(roomId=room_id, markdown=reply)
@@ -227,6 +230,19 @@ def process_incoming_message(post_data):
 def send_echo(incoming):
     # Get sent message
     message = extract_message("/echo", incoming.text)
+    return message
+
+def locate(incoming):
+    print type(incoming)
+    print dir(incoming)
+    print incoming
+    # get whatever it is we are trying locate
+    text = incoming.text.split()[2]
+
+    # make some call to the collector to get the real info
+
+    # for now, we'll just let the user know that we got the request
+    message = "attempting to locate {}".format(text)
     return message
 
 
