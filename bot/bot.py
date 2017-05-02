@@ -61,6 +61,7 @@ from ciscosparkapi import CiscoSparkAPI
 import os
 import sys
 import json
+import requests
 
 # Create the Flask application that provides the bot foundation
 app = Flask(__name__)
@@ -237,7 +238,7 @@ def locate(incoming):
     print dir(incoming)
     print incoming
     # get whatever it is we are trying locate
-    mac_address = incoming.text.split()[2]
+    mac_address = incoming.text.split()[-1]
 
     # make some call to the collector to get the real info
 
@@ -245,12 +246,12 @@ def locate(incoming):
     parameters = { "secret": collector_secret,
                    "mac": mac_address}
 
-    r = request("GET", url, params=parameters)
+    r = requests.get(url, params=parameters)
 
 
     # for now, we'll just let the user know that we got the request
     message = "{} has been located \n".format(mac_address)
-    message += "at {}".format.(r.body)
+    message += "at {}".format(r.text)
     return message
 
 
