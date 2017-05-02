@@ -237,12 +237,20 @@ def locate(incoming):
     print dir(incoming)
     print incoming
     # get whatever it is we are trying locate
-    text = incoming.text.split()[2]
+    mac_address = incoming.text.split()[2]
 
     # make some call to the collector to get the real info
 
+    url = collector_url + "/_get_loc_for_mac/"
+    parameters = { "secret": collector_secret,
+                   "mac": mac_address}
+
+    r = request("GET", url, params=parameters)
+
+
     # for now, we'll just let the user know that we got the request
-    message = "attempting to locate {}".format(text)
+    message = "{} has been located \n".format(mac_address)
+    message += "at {}".format.(r.body)
     return message
 
 
@@ -285,6 +293,8 @@ if __name__ == '__main__':
     spark_token = os.getenv("SPARK_BOT_TOKEN")
     bot_url = os.getenv("SPARK_BOT_URL")
     bot_app_name = os.getenv("SPARK_BOT_APP_NAME")
+    collector_url = os.getenv("COLLECTOR_URL")
+    collector_secret = os.getenv("COLLECTOR_SECRET")
 
     # bot_url and bot_app_name must come in from Environment Variables
     if bot_url is None or bot_app_name is None:
