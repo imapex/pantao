@@ -28,6 +28,10 @@ echo
 echo "What is the token for your bot?  "
 read -s bot_token
 echo
+echo "What is the URL of the merakiCmx Collector you are using?"
+read collector_url
+echo "What is the shared secret for your merakiCmx Collector?"
+read collector_secret
 echo "Your bot will be deployed based on the 'latest' tag of Docker Container at: "
 echo "    https://hub.docker.com/r/$docker_username/$bot_name/"
 echo "Is this correct?  yes/no"
@@ -46,9 +50,12 @@ sed -i "" -e "s/DOCKERREPO/$docker_repo/g" $docker_username-$bot_name-mantl.json
 
 sed -i "" -e "s/USERNAME/$docker_username/g" $docker_username-$bot_name-mantl.json
 sed -i "" -e "s/BOTNAME/$bot_name/g" $docker_username-$bot_name-mantl.json
-#sed -i "" -e "s/BOTEMAIL/$bot_email/g" $docker_username-$bot_name-sandbox.json
-#sed -i "" -e "s/BOTTOKEN/$bot_token/g" $docker_username-$bot_name-sandbox.json
+sed -i "" -e "s/BOTEMAIL/$bot_email/g" $docker_username-$bot_name-mantl.json
+sed -i "" -e "s/BOTTOKEN/$bot_token/g" $docker_username-$bot_name-mantl.json
 sed -i "" -e "s/APPDOMAIN/$mantl_domain/g" $docker_username-$bot_name-mantl.json
+sed -i "" -e "s/COLLECTOR/$collector_url/g" $docker_username-$bot_name-mantl.json
+sed -i "" -e "s/SECRET/$collector_secret/g" $docker_username-$bot_name-mantl.json
+
 
 if [ $TAG != "" ]
 then
