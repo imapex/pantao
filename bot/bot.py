@@ -58,6 +58,7 @@
 
 from flask import Flask, request
 from ciscosparkapi import CiscoSparkAPI
+from collections import OrderedDict
 import os
 import sys
 import json
@@ -218,13 +219,18 @@ def process_incoming_message(post_data):
     # If no command found, send help
     if command in ["", "/help"]:
         reply = send_help(post_data)
+        spark.messages.create(roomId=room_id, markdown=reply)
+
     elif command in ["/echo"]:
         reply = send_echo(message)
+        spark.messages.create(roomId=room_id, markdown=reply)
+
     elif command in ["locate"]:
         reply = locate(message)
+        spark.messages.create(roomId=room_id, markdown=reply[0], files=[reply[1]])
+
 
     # send_message_to_room(room_id, reply)
-    spark.messages.create(roomId=room_id, markdown=reply)
 
 
 # Sample command function that just echos back the sent message
@@ -249,10 +255,30 @@ def locate(incoming):
     r = requests.get(url, params=parameters)
 
 
-    # for now, we'll just let the user know that we got the request
-    message = "{} has been located \n".format(mac_address)
-    message += "at {}".format(r.text)
-    return message
+    # Check for status code 200 - if yes, print output.  If no - print error message:
+
+    if (r.status_code == 200):
+#        print (r.json())
+        j = json.loads(r.json())
+        message = "{} has been located ".format(mac_address)
+#       message += "at {}".format(r.text)
+        message += " at %f Latitude and %f Longitude" % (j['lat'],j['long'])
+#       return message
+
+        # query Google API to get map
+#        map_url = google_map_url
+#        map_parameters = OrderedDict
+        map_url = "{0}?center={1},{2}&zoom=14&size=400x400&markers=color:green|{1},{2}&format=jpg".format(google_map_url,j['lat'],j['long'])
+
+        m = requests.get(map_url)
+        print (m.url)
+#        return message
+        return (message, m.url)
+
+
+    else:
+        message = "There was an error with your Locate query. Verify MAC address and try again."
+        return (message, None)
 
 
 # Construct a help message for users.
@@ -296,6 +322,7 @@ if __name__ == '__main__':
     bot_app_name = os.getenv("SPARK_BOT_APP_NAME")
     collector_url = os.getenv("COLLECTOR_URL")
     collector_secret = os.getenv("COLLECTOR_SECRET")
+    google_map_url = os.getenv("google_map_url")
 
     # bot_url and bot_app_name must come in from Environment Variables
     if bot_url is None or bot_app_name is None:
